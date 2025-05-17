@@ -16,7 +16,6 @@ host_system = host_machine.system()
 
 opt_ARMSIMD = false
 opt_X86SIMD = false
-opt_X86SIMD_AVX512 = false
 
 link_libs = []
 
@@ -26,28 +25,7 @@ if host_cpu_family in ['arm', 'aarch64']
 elif host_cpu_family.startswith('x86')
     opt_X86SIMD = get_option('ENABLE_X86SIMD')
 
-
-    code = '''
-#include <immintrin.h>
-int main()
-{
-	volatile __m512 x = _mm512_setzero_ps();
-	x = _mm512_add_ps(x, x);
-#if defined(__GNUC__) && defined(__x86_64__)
-	asm volatile ("" : : : "zmm16", "zmm17", "zmm18", "zmm19");
-#endif
-	return 0;
-}
-    '''
-    result = cxx.compiles(code, args : ['-mavx512f', '-mavx512pf', '-mavx512er', '-mavx512cd', '-mavx512vl', '-mavx512bw', '-mavx512dq', '-mavx512ifma', '-mavx512vbmi', '-mavx512vbmi2', '-mavx512bitalg', '-mavx512vpopcntdq', '-mavx512vnni'], name : 'avx512 checking')
-
-    opt_X86SIMD_AVX512 = result and get_option('ENABLE_X86SIMD_AVX512')
-
-    if opt_X86SIMD_AVX512
-        compile_args += ['-DZIMG_X86_AVX512']
-    endif
-
-    if opt_X86SIMD or opt_X86SIMD_AVX512
+    if opt_X86SIMD
         compile_args += ['-DZIMG_X86']
     endif
 
@@ -210,16 +188,6 @@ if opt_X86SIMD
         'src/zimg/unresize/x86/unresize_impl_x86.h'
     ]
 
-    SNB_CFLAGS = []
-    if cxx.has_argument('-mtune=sandybridge')
-        SNB_CFLAGS += ['-mtune=sandybridge']
-    endif
-
-    IVB_CFLAGS = []
-    if cxx.has_argument('-mtune=ivybridge')
-        IVB_CFLAGS += ['-mtune=ivybridge']
-    endif
-
     HSW_CFLAGS = []
     if cxx.has_argument('-mtune=haswell')
         HSW_CFLAGS += ['-mtune=haswell']
@@ -240,9 +208,7 @@ if opt_X86SIMD
         gnu_symbol_visibility: 'hidden',
         include_directories: incl_dirs
     )
-endif # X86SIMD
 
-if opt_X86SIMD_AVX512
     avx512_args = ['-mavx512f', '-mavx512cd', '-mavx512vl', '-mavx512bw', '-mavx512dq']
     avx512vnni_args = ['-mavx512f', '-mavx512cd', '-mavx512vl', '-mavx512bw', '-mavx512dq', '-mavx512vnni']
 
