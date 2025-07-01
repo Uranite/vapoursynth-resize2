@@ -1,7 +1,7 @@
 project('resize2', 'cpp',
   default_options : ['buildtype=release', 'b_ndebug=if-release', 'c_std=c89', 'cpp_std=c++17'],
   meson_version : '>=1.0.0',
-  version : '8'
+  version : '0.3.3'
 )
 
 sources = [
