@@ -1,0 +1,11 @@
+option('zimg_dir',
+  type: 'string',
+  value: '',
+  description: 'Path to directory containing z.lib and built DLL'
+)
+
+option('vs_dir',
+  type: 'string',
+  value: '',
+  description: 'Base path to VapourSynth SDK (should contain include and lib64)'
+)
